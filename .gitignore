@@ -46,3 +46,10 @@ desktop.ini
 *.local
 tmp/
 temp/
+
+.agents
+.claude
+.windsurf
+
+# Prisma generated client
+server/src/generated/

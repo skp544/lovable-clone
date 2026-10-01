@@ -8,13 +8,16 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
     "outDir": "dist",
-    "rootDir": "src",
     "resolveJsonModule": true,
     "declaration": false,
     "sourceMap": true
   },
   "include": [
-    "src"
+    "src",
+    "prisma.config.ts"
   ]
 }

@@ -5,3 +5,9 @@ export const findAllProjects = () => {
     orderBy: { createdAt: "desc" },
   });
 };
+
+export const findProjectById = (id: string) => {
+  return prisma.project.findUnique({
+    where: { id },
+  });
+};

@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: vibe
       POSTGRES_DB: lovable
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro

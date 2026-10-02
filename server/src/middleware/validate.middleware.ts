@@ -1,25 +1,15 @@
 import type { RequestHandler } from "express";
-import type { ZodError, ZodType } from "zod";
-import { sendError } from "../utils/response";
+import type { ZodType } from "zod";
 
 type RequestSource = "body" | "query" | "params";
 
-const formatError = (error: ZodError) =>
-  error.issues
-    .map((issue) =>
-      issue.path.length
-        ? `${issue.path.join(".")}: ${issue.message}`
-        : issue.message,
-    )
-    .join(", ");
-
 const validate =
   (source: RequestSource, schema: ZodType): RequestHandler =>
-  (req, res, next) => {
+  (req, _res, next) => {
     const result = schema.safeParse(req[source]);
 
     if (!result.success) {
-      sendError(res, formatError(result.error), 400);
+      next(result.error);
       return;
     }
 

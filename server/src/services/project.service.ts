@@ -6,6 +6,7 @@ import {
   findAllProjects,
   findProjectById,
 } from "../repositories/project.repository";
+import { saveResult } from "../repositories/message.repository";
 
 export const getAllProjects = () => {
   return findAllProjects();
@@ -30,6 +31,15 @@ export const createProject = async (value: string) => {
   });
 
   await writeSandboxFiles(project.id, HELLO_WORLD_FILES);
+
+  await saveResult({
+    projectId: project.id,
+    content: "Here is the hello world sandbox",
+    title: "Hello world",
+    files: HELLO_WORLD_FILES,
+    sandboxUrl: `/api/preview/${project.id}`,
+    isError: false,
+  });
 
   return project;
 };

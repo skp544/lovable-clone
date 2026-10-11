@@ -1,5 +1,9 @@
 import { NativeConnection, Worker } from "@temporalio/worker";
-import { TEMPORAL_ADDRESS, TEMPORAL_TASK_QUEUE } from "../config/env";
+import {
+  TEMPORAL_ADDRESS,
+  TEMPORAL_NAMESPACE,
+  TEMPORAL_TASK_QUEUE,
+} from "../config/env";
 
 async function connect() {
   const connection = await NativeConnection.connect({
@@ -14,8 +18,10 @@ async function main() {
 
   const worker = await Worker.create({
     connection,
+    namespace: TEMPORAL_NAMESPACE,
     taskQueue: TEMPORAL_TASK_QUEUE,
     workflowsPath: require.resolve("./workflows"),
+    activities: {},
   });
 
   console.log(`Temporal worker running on task queue "${TEMPORAL_TASK_QUEUE}"`);

@@ -18,7 +18,7 @@ export interface CodeAgentInput {
   prompt: string;
 }
 
-export async function codeAgentWorkflow(input: CodeAgentInput): Promise<void> {
+export async function codeAgentWorkflow(input: CodeAgentInput) {
   const { projectId } = input;
 
   await createSandbox(projectId);
@@ -32,4 +32,8 @@ export async function codeAgentWorkflow(input: CodeAgentInput): Promise<void> {
     sandboxUrl: `/api/preview/${projectId}`,
     isError: false,
   });
+
+  return {
+    files: null,
+  };
 }

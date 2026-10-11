@@ -5,7 +5,11 @@ import {
   TEMPORAL_TASK_QUEUE,
 } from "../config/env";
 import { retryWithBackoff } from "../utils/retry";
-import { pingWorkflow } from "./workflows";
+import {
+  codeAgentWorkflow,
+  pingWorkflow,
+  type CodeAgentInput,
+} from "./workflows";
 
 let clientPromise: Promise<Client> | undefined;
 
@@ -35,4 +39,16 @@ export async function startPing(name: string) {
     workflowId: `ping-${Date.now()}`,
     args: [name],
   });
+}
+
+export async function startCodeAgent(input: CodeAgentInput) {
+  const client = await connect();
+
+  const handle = await client.workflow.start(codeAgentWorkflow, {
+    taskQueue: TEMPORAL_TASK_QUEUE,
+    workflowId: `code-agent-${input.projectId}-${Date.now()}`,
+    args: [input],
+  });
+
+  return handle.result();
 }

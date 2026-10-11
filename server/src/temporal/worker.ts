@@ -5,6 +5,7 @@ import {
   TEMPORAL_TASK_QUEUE,
 } from "../config/env";
 import { retryWithBackoff } from "../utils/retry";
+import * as activities from "./activities";
 
 async function connect() {
   const connection = await retryWithBackoff(
@@ -23,7 +24,7 @@ async function main() {
     namespace: TEMPORAL_NAMESPACE,
     taskQueue: TEMPORAL_TASK_QUEUE,
     workflowsPath: require.resolve("./workflows"),
-    activities: {},
+    activities,
   });
 
   console.log(`Temporal worker running on task queue "${TEMPORAL_TASK_QUEUE}"`);

@@ -8,6 +8,7 @@ An AI coding-agent backend inspired by Lovable. Users create projects and send p
 - **Database:** PostgreSQL 16 via Prisma 7 (`@prisma/adapter-pg`)
 - **Orchestration:** Temporal (client, worker, workflows, activities)
 - **Validation:** Zod
+- **Logging:** Winston, with Morgan for HTTP request logs
 
 ## Project Structure
 
@@ -65,6 +66,8 @@ The API listens on `http://localhost:3000` by default. The Temporal UI is at `ht
 | `DATABASE_URL`          | — (required)      | Postgres connection string   |
 | `API_PORT`              | `3000`            | API server port              |
 | `NODE_ENV`              | `development`     | Environment                  |
+| `LOG_LEVEL`             | `http` (`info` in production) | Winston log level |
+| `LOG_DIR`               | `logs`            | Log file directory (production only) |
 | `TEMPORAL_ADDRESS`      | `localhost:7233`  | Temporal server address      |
 | `TEMPORAL_TASK_QUEUE`   | `coding-agent`    | Temporal task queue          |
 | `TEMPORAL_NAMESPACE`    | `default`         | Temporal namespace           |

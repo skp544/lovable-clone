@@ -6,13 +6,14 @@ import {
 } from "../config/env";
 import { retryWithBackoff } from "../utils/retry";
 import * as activities from "./activities";
+import { logger } from "../lib/logger";
 
 async function connect() {
   const connection = await retryWithBackoff(
     () => NativeConnection.connect({ address: TEMPORAL_ADDRESS }),
     { label: "Temporal connection" },
   );
-  console.log(`Connected to Temporal at ${TEMPORAL_ADDRESS}`);
+  logger.info(`Connected to Temporal at ${TEMPORAL_ADDRESS}`);
   return connection;
 }
 
@@ -27,11 +28,11 @@ async function main() {
     activities,
   });
 
-  console.log(`Temporal worker running on task queue "${TEMPORAL_TASK_QUEUE}"`);
+  logger.info(`Temporal worker running on task queue "${TEMPORAL_TASK_QUEUE}"`);
   await worker.run();
 }
 
 main().catch((err) => {
-  console.error("Temporal worker failed", err);
+  logger.error("Temporal worker failed", err);
   process.exit(1);
 });

@@ -1,3 +1,4 @@
+import { logger } from "./logger";
 import { exec } from "child_process";
 import fs from "fs/promises";
 import path from "path";
@@ -150,7 +151,7 @@ export async function readSandboxFiles(
     } catch (err) {
       // A missing file is expected for caller-supplied paths; skip quietly.
       if ((err as NodeJS.ErrnoException).code !== "ENOENT") {
-        console.error(`Error reading file: ${fullPath}`, err);
+        logger.error(`Error reading file: ${fullPath}`, err);
       }
     }
   }
@@ -200,7 +201,7 @@ export async function readSandboxTree(
           "utf-8",
         );
       } catch (err) {
-        console.error(`Error reading file: ${fullPath}`, err);
+        logger.error(`Error reading file: ${fullPath}`, err);
       }
     }
   };

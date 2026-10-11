@@ -10,6 +10,7 @@ import {
   pingWorkflow,
   type CodeAgentInput,
 } from "./workflows";
+import { logger } from "../lib/logger";
 
 let clientPromise: Promise<Client> | undefined;
 
@@ -20,7 +21,7 @@ export function connect(): Promise<Client> {
     { label: "Temporal client connection" },
   )
     .then((connection) => {
-      console.log(`Temporal client connected to ${TEMPORAL_ADDRESS}`);
+      logger.info(`Temporal client connected to ${TEMPORAL_ADDRESS}`);
       return new Client({ connection, namespace: TEMPORAL_NAMESPACE });
     })
     .catch((err) => {

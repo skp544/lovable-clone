@@ -4,6 +4,7 @@ import { ZodError } from "zod";
 import { Prisma } from "../generated/prisma/client";
 import { AppError, NotFoundError } from "../errors/app.error";
 import { sendError } from "../utils/response";
+import { logger } from "../lib/logger";
 
 interface ErrorInfo {
   status: number;
@@ -113,7 +114,7 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, next) => {
   const { status, message } = toErrorInfo(error);
 
   if (status >= StatusCodes.INTERNAL_SERVER_ERROR) {
-    console.error(error);
+    logger.error(error);
   }
 
   sendError(res, message, status);

@@ -1,3 +1,5 @@
+import { logger } from "../lib/logger";
+
 interface RetryOptions {
   label: string;
   maxAttempts?: number;
@@ -19,7 +21,7 @@ export async function retryWithBackoff<T>(
       if (attempt >= maxAttempts) throw err;
 
       const delay = initialDelayMs * 2 ** (attempt - 1);
-      console.warn(
+      logger.warn(
         `${label} attempt ${attempt}/${maxAttempts} failed, retrying in ${delay}ms`,
       );
       await sleep(delay);

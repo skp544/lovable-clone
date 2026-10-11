@@ -19,3 +19,8 @@ export const TEMPORAL_TASK_QUEUE =
   process.env.TEMPORAL_TASK_QUEUE || "coding-agent";
 
 export const TEMPORAL_NAMESPACE = process.env.TEMPORAL_NAMESPACE || "default";
+
+export const LOG_LEVEL =
+  process.env.LOG_LEVEL || (NODE_ENV === "production" ? "info" : "http");
+
+export const LOG_DIR = process.env.LOG_DIR || "logs";

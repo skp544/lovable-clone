@@ -20,12 +20,7 @@ export const TEMPORAL_TASK_QUEUE =
 
 export const TEMPORAL_NAMESPACE = process.env.TEMPORAL_NAMESPACE || "default";
 
-const openaiApiKey = process.env.OPENAI_API_KEY;
-if (!openaiApiKey) {
-  throw new Error("OPENAI_API_KEY is not set");
-}
-
-export const OPENAI_API_KEY = openaiApiKey;
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY || undefined;
 
 export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
 

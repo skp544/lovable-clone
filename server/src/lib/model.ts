@@ -18,3 +18,11 @@ export function openaiChatModel(model: string, reasoning: boolean) {
 
   return new ChatOpenAI({ model, apiKey: OPENAI_API_KEY });
 }
+
+export function getChatModel(model: string, reasoning = false) {
+  if (OPENAI_API_KEY) {
+    return openaiChatModel(model, reasoning);
+  }
+
+  throw new Error("No chat model provider configured: set OPENAI_API_KEY");
+}

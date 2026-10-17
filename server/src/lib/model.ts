@@ -19,8 +19,12 @@ export function openaiChatModel(model: string, reasoning: boolean) {
   return new ChatOpenAI({ model, apiKey: OPENAI_API_KEY });
 }
 
+export function hasLlm(): boolean {
+  return Boolean(OPENAI_API_KEY);
+}
+
 export function getChatModel(model: string, reasoning = false) {
-  if (OPENAI_API_KEY) {
+  if (hasLlm()) {
     return openaiChatModel(model, reasoning);
   }
 

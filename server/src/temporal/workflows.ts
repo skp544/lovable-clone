@@ -2,12 +2,13 @@ import { proxyActivities } from "@temporalio/workflow";
 // Type-only: the workflow sandbox must not bundle the activity implementations.
 import type * as activities from "./activities";
 
-const { createSandbox, saveResult } = proxyActivities<typeof activities>({
-  startToCloseTimeout: "10 minutes",
-  retry: {
-    maximumAttempts: 3,
-  },
-});
+const { createSandbox, saveResult, generateResponse, generateTitle } =
+  proxyActivities<typeof activities>({
+    startToCloseTimeout: "10 minutes",
+    retry: {
+      maximumAttempts: 3,
+    },
+  });
 
 export async function pingWorkflow(name: string): Promise<string> {
   return `Hello, ${name}!`;
@@ -23,11 +24,16 @@ export async function codeAgentWorkflow(input: CodeAgentInput) {
 
   await createSandbox(projectId);
 
+  const sampleSummary = "A custom react app to create todo list app"; // once a coding agent is completed
+  const title = await generateTitle(sampleSummary);
+
+  const response = await generateResponse(sampleSummary);
+
   // Dummy values until the agent actually generates an app.
   await saveResult({
     projectId,
-    content: "Here is the dummy result",
-    title: "Dummy app",
+    content: response,
+    title: title,
     files: { "src/App.tsx": "export default function App() { return null; }" },
     sandboxUrl: `/api/preview/${projectId}`,
     isError: false,

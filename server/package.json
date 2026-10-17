@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "tsx watch --exclude \"**/node_modules/**\" src/index.ts"
+    "dev": "npm run dev:server",
+    "dev:all": "concurrently -n server,worker -c cyan,magenta \"npm:dev:server\" \"npm:dev:worker\"",
+    "dev:server": "tsx watch --exclude \"**/node_modules/**\" src/index.ts",
+    "dev:worker": "tsx watch --exclude \"**/node_modules/**\" src/temporal/worker.ts"
   },
   "dependencies": {
     "@langchain/core": "^1.2.18",
@@ -31,6 +34,7 @@
     "@types/morgan": "^1.9.10",
     "@types/node": "^26.6.3",
     "@types/pg": "^8.23.1",
+    "concurrently": "^10.0.6",
     "prisma": "^7.10.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"

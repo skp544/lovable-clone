@@ -20,6 +20,33 @@ export const TEMPORAL_TASK_QUEUE =
 
 export const TEMPORAL_NAMESPACE = process.env.TEMPORAL_NAMESPACE || "default";
 
+const openaiApiKey = process.env.OPENAI_API_KEY;
+if (!openaiApiKey) {
+  throw new Error("OPENAI_API_KEY is not set");
+}
+
+export const OPENAI_API_KEY = openaiApiKey;
+
+export const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+export const OPENAI_BUILDER_MODEL =
+  process.env.OPENAI_BUILDER_MODEL || "gpt-5-mini";
+
+export const OPENAI_PLANNING_MODEL =
+  process.env.OPENAI_PLANNING_MODEL || "gpt-5-mini";
+
+export const OPENAI_REASONING_MODEL =
+  process.env.OPENAI_REASONING_MODEL || "gpt-5-mini";
+
+export type ReasoningEffort = "low" | "medium" | "high";
+
+const REASONING_EFFORTS: readonly ReasoningEffort[] = ["low", "medium", "high"];
+
+const rawReasoningEffort = process.env.OPENAI_REASONING_EFFORT;
+
+export const OPENAI_REASONING_EFFORT: ReasoningEffort =
+  REASONING_EFFORTS.find((effort) => effort === rawReasoningEffort) ?? "medium";
+
 export const LOG_LEVEL =
   process.env.LOG_LEVEL || (NODE_ENV === "production" ? "info" : "http");
 

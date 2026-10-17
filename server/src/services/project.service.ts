@@ -7,6 +7,7 @@ import {
   findProjectById,
 } from "../repositories/project.repository";
 import { saveResult } from "../repositories/message.repository";
+import { startCodeAgent } from "../temporal/client";
 
 export const getAllProjects = () => {
   return findAllProjects();
@@ -30,15 +31,9 @@ export const createProject = async (value: string) => {
     content: value,
   });
 
-  await writeSandboxFiles(project.id, HELLO_WORLD_FILES);
-
-  await saveResult({
+  await startCodeAgent({
     projectId: project.id,
-    content: "Here is the hello world sandbox",
-    title: "Hello world",
-    files: HELLO_WORLD_FILES,
-    sandboxUrl: `/api/preview/${project.id}`,
-    isError: false,
+    prompt: value,
   });
 
   return project;

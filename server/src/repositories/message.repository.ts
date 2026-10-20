@@ -1,7 +1,13 @@
 import type { AgentChatMessage } from "../agents/types";
 import { LOCAL_USER_ID } from "../config/constants";
 import { MessageRole, MessageType } from "../generated/prisma/client";
-import { formatPlanForAgent, parsePlanMessage } from "../lib/plan";
+import {
+  formatPlanForAgent,
+  parsePlanMessage,
+  PlanActivity,
+  serializedPlanMessage,
+  TodoItem,
+} from "../lib/plan";
 import { prisma } from "../lib/prisma";
 import type { FileCollection } from "../lib/sandbox";
 
@@ -66,3 +72,32 @@ export const saveResult = ({
     include: { fragments: true },
   });
 };
+
+export async function savePlanMessage(input: {
+  projectId: string;
+  messageId: string;
+  todos: TodoItem[];
+  activity?: PlanActivity | null;
+}) {
+  const content = serializedPlanMessage(input.todos, input.activity);
+
+  if (input.messageId) {
+    return prisma.message.update({
+      where: {
+        id: input.messageId,
+      },
+      data: {
+        content,
+      },
+    });
+  }
+
+  return prisma.message.create({
+    data: {
+      projectId: input.projectId,
+      content,
+      role: "ASSISTANT",
+      type: "RESULT",
+    },
+  });
+}

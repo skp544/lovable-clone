@@ -126,3 +126,17 @@ export const parsePlanMessage = (content: string): TodoItem[] | null => {
   const todos = parseTodos(parsed.todos);
   return todos.length > 0 ? todos : null;
 };
+
+export function serializedPlanMessage(
+  todos: TodoItem[],
+  activity?: PlanActivity | null,
+): string {
+  const payload: PlanMessage = {
+    kind: PLAN_KIND,
+    todos,
+  };
+
+  if (activity?.agent && activity.details) payload.activity = activity;
+
+  return JSON.stringify(payload);
+}

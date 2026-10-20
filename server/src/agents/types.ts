@@ -1,4 +1,4 @@
-import { TodoItem } from "../lib/plan";
+import { PlanActivity, TodoItem } from "../lib/plan";
 
 export type Role = "user" | "assistant" | "system";
 
@@ -11,7 +11,7 @@ export interface AgentRunHooks {
   onProgress?: () => void;
   onTodos?: (
     todos: TodoItem[],
-    activity?: { agent: string; detail: string } | null,
+    activity?: PlanActivity | null,
   ) => Promise<void>;
   signal?: AbortSignal;
 }

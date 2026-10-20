@@ -1,8 +1,34 @@
-export type TodoStatus = "pending" | "in_progress" | "completed";
+export type TodoStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+export type TodoPhase = "design" | "build" | "review" | "cancelled";
+
+const STATUSES: TodoStatus[] = [
+  "pending",
+  "in_progress",
+  "completed",
+  "cancelled",
+];
+
+const PHASES: TodoPhase[] = ["design", "build", "review", "cancelled"];
+
+const PHASE_INDEX: Record<TodoPhase, number> = {
+  design: 0,
+  build: 1,
+  review: 2,
+  cancelled: 3,
+};
+
+const STATUS_TRANSITIONS: Record<TodoStatus, TodoStatus[]> = {
+  pending: ["in_progress"],
+  in_progress: ["completed", "cancelled"],
+  completed: [],
+  cancelled: [],
+};
 
 export interface TodoItem {
   content: string;
   status: TodoStatus;
+  phase: TodoPhase;
 }
 
 export const PLAN_KIND = "plan";
@@ -18,7 +44,37 @@ export interface PlanMessage {
   activity?: PlanActivity;
 }
 
-const STATUSES: TodoStatus[] = ["pending", "in_progress", "completed"];
+export function canTransitionStatus(from: TodoStatus, to: TodoStatus): boolean {
+  if (from === to) return true;
+  return STATUS_TRANSITIONS[from]?.includes(to) ?? false;
+}
+
+export function transitionStatus(from: TodoStatus, to: TodoStatus): TodoStatus {
+  if (canTransitionStatus(from, to)) {
+    return to;
+  }
+
+  throw new Error(`Cannot transition from ${from} to ${to}`);
+}
+
+export const inferToDoPhase = (content: string): TodoPhase => {
+  const text = content.toLowerCase();
+
+  if (/\b(review|polish|summary|export|verify|preview)/.test(text)) {
+    return "review";
+  }
+  if (/\b(design|visual|ux|architect|reason|wireframe)/.test(text)) {
+    return "design";
+  }
+  return "build";
+};
+
+export const parsePhase = (value: unknown, content: string): TodoPhase => {
+  if (typeof value === "string" && PHASES.includes(value as TodoPhase)) {
+    return value as TodoPhase;
+  }
+  return inferToDoPhase(content); // guess the phase
+};
 
 export const normalizeTodo = (value: unknown): TodoItem | null => {
   if (!value || typeof value !== "object") return null;
@@ -31,6 +87,7 @@ export const normalizeTodo = (value: unknown): TodoItem | null => {
     status: STATUSES.includes(status as TodoStatus)
       ? (status as TodoStatus)
       : "pending",
+    phase: inferToDoPhase(content),
   };
 };
 

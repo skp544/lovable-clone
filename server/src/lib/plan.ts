@@ -79,15 +79,20 @@ export const parsePhase = (value: unknown, content: string): TodoPhase => {
 export const normalizeTodo = (value: unknown): TodoItem | null => {
   if (!value || typeof value !== "object") return null;
 
-  const { content, status } = value as { content?: unknown; status?: unknown };
+  const { content, status, phase } = value as {
+    content?: unknown;
+    status?: unknown;
+    phase?: unknown;
+  };
   if (typeof content !== "string" || !content.trim()) return null;
 
+  const parsedPhase = parsePhase(phase, content);
   return {
     content: content.trim(),
     status: STATUSES.includes(status as TodoStatus)
       ? (status as TodoStatus)
       : "pending",
-    phase: inferToDoPhase(content),
+    phase: parsedPhase,
   };
 };
 

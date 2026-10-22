@@ -84,7 +84,9 @@ export const runPlannerActivity = async (
       state.todos,
       "design_app",
       "start",
-    );
+    ); // move the design related todos from pending to in_progress
+
+    // state.todos = result.todos;
 
     await syncPlan(input.projectId, state, state.todos, {
       agent: "planner",

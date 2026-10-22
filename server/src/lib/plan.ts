@@ -243,6 +243,6 @@ export function defaultPlan(prompt: string): TodoItem[] {
 
   return steps.map((step, index) => ({
     ...step,
-    status: index === 0 ? "in_progress" : "pending",
+    status: "pending",
   }));
 }

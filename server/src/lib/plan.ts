@@ -125,16 +125,35 @@ export function updateTodoStatusForSubAgent(
   });
 }
 
+const PHASE_TAG_PATTERN = /\bphase\s*:\s*(design|build|review)\b/;
+
+const REVIEW_PHASE_PATTERN =
+  /\b(review|summary|export|verify|validation|preview|qa|q&a|quality|accessibility|a11y|audit|test|testing|edge cases|edge-case|typescript check|compile check|bundling)\b/;
+
+const DESIGN_PHASE_PATTERN =
+  /\b(define|design|designing|ux|ui|ia|information architecture|architect|architecture|reason|reasoning|wireframe|mockup|prototype|visual identity|identity|palette|typography|spacing|radius|user flow|user-flow|layout|spec|planning|file map|component plan|structure plan|scoping)\b/;
+
+const BUILD_PHASE_PATTERN =
+  /\b(build|implement|implementation|scaffold|boilerplate|develop|code|coding|wire|integrate|integration|tailwind|state|interaction|interactions|styling|style|polish|responsive|mobile|desktop|colors|touch targets|touch-target|lucide|icons|persist|localstorage|local storage|fetch|api|hook up|connect|add feature|create feature)\b/;
+
+const countMatches = (pattern: RegExp, text: string): number =>
+  text.match(new RegExp(pattern.source, "g"))?.length ?? 0;
+
 export const inferToDoPhase = (content: string): TodoPhase => {
   const text = content.toLowerCase();
 
-  if (/\b(review|polish|summary|export|verify|preview)/.test(text)) {
-    return "review";
-  }
-  if (/\b(design|visual|ux|architect|reason|wireframe)/.test(text)) {
-    return "design";
-  }
-  return "build";
+  // The explicit "Phase: x" tag the planner appends is authoritative.
+  const tag = PHASE_TAG_PATTERN.exec(text);
+  if (tag) return tag[1] as TodoPhase;
+
+  // Otherwise the phase with the most keyword hits wins; ties go to build.
+  const scores: [TodoPhase, number][] = [
+    ["build", countMatches(BUILD_PHASE_PATTERN, text)],
+    ["design", countMatches(DESIGN_PHASE_PATTERN, text)],
+    ["review", countMatches(REVIEW_PHASE_PATTERN, text)],
+  ];
+
+  return scores.reduce((best, next) => (next[1] > best[1] ? next : best))[0];
 };
 
 export const parsePhase = (value: unknown, content: string): TodoPhase => {
@@ -163,6 +182,14 @@ export const normalizeTodo = (value: unknown): TodoItem | null => {
     phase: parsedPhase,
   };
 };
+
+export function parsePlannerTodos(value: unknown): TodoItem[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => normalizeTodo(item))
+    .filter((item): item is TodoItem => Boolean(item));
+}
 
 export const parseTodos = (value: unknown): TodoItem[] => {
   if (!Array.isArray(value)) return [];
@@ -215,29 +242,32 @@ export function defaultPlan(prompt: string): TodoItem[] {
   const steps: Pick<TodoItem, "content" | "phase">[] = [
     {
       phase: "design",
-      content: `Reason about the UX and layout for the request: "${brief}"`,
+      content: `Define the product UX and visual identity for "${brief}": palette, typography scale, spacing, radius, and the main user flow. Phase: design`,
+    },
+    {
+      phase: "design",
+      content:
+        "Design wireframes for mobile and desktop: layout, key screens, component plan, and empty/error states. Phase: design",
     },
     {
       phase: "build",
       content:
-        "Create the basic boilerplate structure with src/App.tsx and a default export",
-    },
-    {
-      phase: "build",
-      content: "Add reusable components under src/components",
+        "Scaffold src/App.tsx with a default export and implement the core components under src/components. Phase: build",
     },
     {
       phase: "build",
       content:
-        "Compose the components in App.tsx and style them with Tailwind, responsive from mobile up",
+        "Implement interactions and state: local state, handlers, and realistic sample data. Phase: build",
     },
     {
       phase: "build",
-      content: "Add state, interactions and realistic sample data",
+      content:
+        "Polish the responsive layout with Tailwind: spacing, touch targets, accessibility, and edge cases. Phase: build",
     },
     {
       phase: "review",
-      content: "Verify the app renders in preview, then polish and summarize",
+      content:
+        "Review and QA: run a TypeScript check, preview the app, and verify responsive behavior. Phase: review",
     },
   ];
 

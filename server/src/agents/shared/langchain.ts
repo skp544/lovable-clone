@@ -35,37 +35,55 @@ export function lastAssistantText(messages: unknown[]): string {
 
 type PlannerStreamState = {
   messages: unknown[];
+  todos: unknown[];
 };
 
 function streamStateFromChunk(chunk: unknown): PlannerStreamState {
-  if (!chunk || typeof chunk !== "object") return { messages: [] };
+  if (!chunk || typeof chunk !== "object") return { messages: [], todos: [] };
 
   const record = chunk as Record<string, unknown>;
 
-  if (Array.isArray(record.messages)) {
-    return { messages: record.messages };
+  if ("todos" in record) {
+    return {
+      todos: Array.isArray(record.todos) ? record.todos : [],
+      messages: Array.isArray(record.messages) ? record.messages : [],
+    };
   }
 
-  return { messages: [] };
+  if (Array.isArray(record.messages)) {
+    return {
+      todos: [],
+      messages: Array.isArray(record.messages) ? record.messages : [],
+    };
+  }
+
+  return { messages: [], todos: [] };
 }
 
 export async function streamAgentValues(
   stream: AsyncIterable<unknown>,
   onProgress?: () => void,
-): Promise<unknown[]> {
+): Promise<{ messages: unknown[]; todos: unknown[] }> {
   let chunkIndex = -1;
 
   let lastMessages: unknown[] = [];
+  let lastTodos: unknown[] = [];
 
   for await (const chunk of stream) {
     chunkIndex += 1;
 
     onProgress?.(); // send the heartbeat to temporal activity
 
-    const { messages } = streamStateFromChunk(chunk);
+    const { messages, todos } = streamStateFromChunk(chunk);
 
-    lastMessages = messages;
+    if (todos.length > 0) {
+      lastTodos = todos;
+    }
+
+    if (messages.length > 0) {
+      lastMessages = messages;
+    }
   }
 
-  return lastMessages;
+  return { messages: lastMessages, todos: lastTodos };
 }

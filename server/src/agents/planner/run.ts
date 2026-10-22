@@ -1,7 +1,7 @@
 import { OPENAI_MODEL } from "../../config/env";
 import { logger } from "../../lib/logger";
 import { getChatModel, hasLlm } from "../../lib/model";
-import { defaultPlan, TodoItem } from "../../lib/plan";
+import { defaultPlan, parsePlannerTodos, TodoItem } from "../../lib/plan";
 import { appendAgentMessage } from "../shared/handoff";
 import { lastAssistantText, streamAgentValues } from "../shared/langchain";
 import { PlannerInput, PlannerResult } from "../types";
@@ -49,13 +49,18 @@ export async function runPlanner(input: PlannerInput): Promise<PlannerResult> {
     recursionLimit: 12,
   });
 
-  const lastMessages = await streamAgentValues(stream, input.onProgress);
+  const { messages: lastMessages, todos: lastTodos } = await streamAgentValues(
+    stream,
+    input.onProgress,
+  );
+
+  const parsedTodos = parsePlannerTodos(lastTodos);
 
   const notes =
     lastAssistantText(lastMessages) ||
     "[Hardcoded] Plan created for the project";
 
-  await input.onTodos?.(todos, {
+  await input.onTodos?.(parsedTodos, {
     agent: "planner",
     details: "Plan created by agent for the project",
   });
@@ -64,7 +69,7 @@ export async function runPlanner(input: PlannerInput): Promise<PlannerResult> {
 
   return {
     notes,
-    todos,
+    todos: parsedTodos,
     thread,
   };
 }

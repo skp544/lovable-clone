@@ -63,34 +63,35 @@ const fileOptions = {
   tailable: true,
 };
 
-// Console is pretty-printed in dev; files are always JSON. Both file
-// transports also capture crashes (uncaught exceptions / rejections).
+// Console always; files only in production so local runs stay clean. Both
+// file transports also capture crashes (uncaught exceptions / rejections).
 const transports: winston.transport[] = [
   new winston.transports.Console({
-    format: isProduction ? undefined : devFormat,
     silent: isTest,
     handleExceptions: true,
     handleRejections: true,
   }),
 ];
 
-transports.push(
-  new winston.transports.File({
-    filename: path.join(LOG_DIR, "combined.log"),
-    ...fileOptions,
-  }),
-  new winston.transports.File({
-    filename: path.join(LOG_DIR, "error.log"),
-    level: "error",
-    handleExceptions: true,
-    handleRejections: true,
-    ...fileOptions,
-  }),
-);
+if (isProduction) {
+  transports.push(
+    new winston.transports.File({
+      filename: path.join(LOG_DIR, "combined.log"),
+      ...fileOptions,
+    }),
+    new winston.transports.File({
+      filename: path.join(LOG_DIR, "error.log"),
+      level: "error",
+      handleExceptions: true,
+      handleRejections: true,
+      ...fileOptions,
+    }),
+  );
+}
 
 export const logger = winston.createLogger({
   level: LOG_LEVEL,
-  format: prodFormat,
+  format: isProduction ? prodFormat : devFormat,
   defaultMeta: { service: "lovable-server", env: NODE_ENV, pid: process.pid },
   transports,
   exitOnError: true,

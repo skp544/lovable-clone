@@ -32,3 +32,40 @@ export function lastAssistantText(messages: unknown[]): string {
 
   return "";
 }
+
+type PlannerStreamState = {
+  messages: unknown[];
+};
+
+function streamStateFromChunk(chunk: unknown): PlannerStreamState {
+  if (!chunk || typeof chunk !== "object") return { messages: [] };
+
+  const record = chunk as Record<string, unknown>;
+
+  if (Array.isArray(record.messages)) {
+    return { messages: record.messages };
+  }
+
+  return { messages: [] };
+}
+
+export async function streamAgentValues(
+  stream: AsyncIterable<unknown>,
+  onProgress?: () => void,
+): Promise<unknown[]> {
+  let chunkIndex = -1;
+
+  let lastMessages: unknown[] = [];
+
+  for await (const chunk of stream) {
+    chunkIndex += 1;
+
+    onProgress?.(); // send the heartbeat to temporal activity
+
+    const { messages } = streamStateFromChunk(chunk);
+
+    lastMessages = messages;
+  }
+
+  return lastMessages;
+}

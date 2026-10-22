@@ -3,29 +3,13 @@ import { logger } from "../../lib/logger";
 import { getChatModel, hasLlm } from "../../lib/model";
 import { defaultPlan, TodoItem } from "../../lib/plan";
 import { appendAgentMessage } from "../shared/handoff";
-import { lastAssistantText } from "../shared/langchain";
+import { lastAssistantText, streamAgentValues } from "../shared/langchain";
 import { PlannerInput, PlannerResult } from "../types";
 import { createAgent } from "langchain";
 
 const PLANNER_PROMPT = `
   You are the planning lead. Do no write code. In 2-4 sentences, outline how you would approach building the user's app (UX, risks, order of work). Do not markdown headings.
 `;
-
-type PlannerStreamState = {
-  messages: unknown[];
-};
-
-function streamStateFromChunk(chunk: unknown): PlannerStreamState {
-  if (!chunk || typeof chunk !== "object") return { messages: [] };
-
-  const record = chunk as Record<string, unknown>;
-
-  if (Array.isArray(record.messages)) {
-    return { messages: record.messages };
-  }
-
-  return { messages: [] };
-}
 
 export async function runPlanner(input: PlannerInput): Promise<PlannerResult> {
   const todos: TodoItem[] = input.todos.length
@@ -67,19 +51,7 @@ export async function runPlanner(input: PlannerInput): Promise<PlannerResult> {
     recursionLimit: 12,
   });
 
-  let chunkIndex = 0;
-
-  let lastMessages: unknown[] = [];
-
-  for await (const chunk of stream) {
-    chunkIndex += 1;
-
-    input.onProgress?.(); // send the heartbeat to temporal activity
-
-    const { messages } = streamStateFromChunk(chunk);
-
-    lastMessages = messages;
-  }
+  const lastMessages = await streamAgentValues(stream, input.onProgress);
 
   const notes =
     lastAssistantText(lastMessages) ||

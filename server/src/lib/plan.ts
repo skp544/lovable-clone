@@ -57,6 +57,74 @@ export function transitionStatus(from: TodoStatus, to: TodoStatus): TodoStatus {
   throw new Error(`Cannot transition from ${from} to ${to}`);
 }
 
+function applyStatus(todo: TodoItem, to: TodoStatus): TodoItem {
+  const status = transitionStatus(todo.status, to);
+
+  return {
+    ...todo,
+    status,
+  };
+}
+
+const TOOL_NAME_TO_PHASE: Record<string, TodoPhase> = {
+  design_app: "design",
+  build_ui: "build",
+  review_app: "review",
+  cancelled: "cancelled",
+};
+
+export function phaseForToolName(toolName: string): TodoPhase | null {
+  if (toolName in TOOL_NAME_TO_PHASE) {
+    return TOOL_NAME_TO_PHASE[toolName];
+  }
+
+  return null;
+}
+
+export function updateTodoStatusForSubAgent(
+  todos: TodoItem[],
+  toolName: string,
+  stage: "start" | "complete" | "cancel",
+): TodoItem[] {
+  const pipelinePhase = phaseForToolName(toolName);
+
+  if (!pipelinePhase) return todos;
+
+  const currentPhaseIndex = PHASE_INDEX[pipelinePhase];
+
+  let markedCurrent = false;
+
+  return todos.map((todo) => {
+    const todoIndex = PHASE_INDEX[todo.phase];
+
+    if (todoIndex < currentPhaseIndex) {
+      return applyStatus(todo, "completed");
+    }
+
+    if (todoIndex > currentPhaseIndex) {
+      if (todo.status === "in_progress") {
+        return applyStatus(todo, "pending");
+      }
+      return todo;
+    }
+
+    if (stage === "complete") {
+      return applyStatus(todo, "completed");
+    }
+
+    if (!markedCurrent && todo.status !== "completed") {
+      markedCurrent = true;
+      return applyStatus(todo, "in_progress");
+    }
+
+    if (todo.status === "in_progress") {
+      return applyStatus(todo, "pending");
+    }
+
+    return todo;
+  });
+}
+
 export const inferToDoPhase = (content: string): TodoPhase => {
   const text = content.toLowerCase();
 

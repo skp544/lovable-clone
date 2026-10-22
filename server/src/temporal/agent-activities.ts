@@ -4,7 +4,12 @@ import { AgentBasePayload, WorkflowPipelineState } from "./workflow-types";
 import { hasLlm } from "../lib/model";
 import { runPlanner } from "../agents/planner/run";
 import { todoListMiddleware } from "langchain";
-import { PlanActivity, serializedPlanMessage, TodoItem } from "../lib/plan";
+import {
+  PlanActivity,
+  serializedPlanMessage,
+  TodoItem,
+  updateTodoStatusForSubAgent,
+} from "../lib/plan";
 import { prisma } from "../lib/prisma";
 import { savePlanMessage } from "../repositories/message.repository";
 
@@ -74,6 +79,12 @@ export const runPlannerActivity = async (
     });
 
     state.thread = result.thread;
+
+    state.todos = updateTodoStatusForSubAgent(
+      state.todos,
+      "design_app",
+      "start",
+    );
 
     await syncPlan(input.projectId, state, state.todos, {
       agent: "planner",

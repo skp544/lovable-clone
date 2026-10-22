@@ -208,3 +208,41 @@ export function serializedPlanMessage(
 
   return JSON.stringify(payload);
 }
+
+export function defaultPlan(prompt: string): TodoItem[] {
+  const brief = prompt.trim().slice(0, 80);
+
+  const steps: Pick<TodoItem, "content" | "phase">[] = [
+    {
+      phase: "design",
+      content: `Reason about the UX and layout for the request: "${brief}"`,
+    },
+    {
+      phase: "build",
+      content:
+        "Create the basic boilerplate structure with src/App.tsx and a default export",
+    },
+    {
+      phase: "build",
+      content: "Add reusable components under src/components",
+    },
+    {
+      phase: "build",
+      content:
+        "Compose the components in App.tsx and style them with Tailwind, responsive from mobile up",
+    },
+    {
+      phase: "build",
+      content: "Add state, interactions and realistic sample data",
+    },
+    {
+      phase: "review",
+      content: "Verify the app renders in preview, then polish and summarize",
+    },
+  ];
+
+  return steps.map((step, index) => ({
+    ...step,
+    status: index === 0 ? "in_progress" : "pending",
+  }));
+}

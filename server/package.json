@@ -6,7 +6,11 @@
     "dev": "npm run dev:server",
     "dev:all": "concurrently -n server,worker -c cyan,magenta \"npm:dev:server\" \"npm:dev:worker\"",
     "dev:server": "tsx watch --exclude \"**/node_modules/**\" src/index.ts",
-    "dev:worker": "tsx watch --exclude \"**/node_modules/**\" src/temporal/worker.ts"
+    "dev:worker": "tsx watch --exclude \"**/node_modules/**\" src/temporal/worker.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:push": "prisma db push"
   },
   "dependencies": {
     "@langchain/core": "^1.2.18",
